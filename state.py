@@ -35,11 +35,11 @@ def load_companies() -> list[dict]:
     return res.data
 
 
-def add_company(name: str, contact_person: str) -> dict:
+def add_company(name: str, contact_person: str, assigned_list_id: str | None = None) -> dict:
     res = (
         _client()
         .table("companies")
-        .insert({"name": name, "contact_person": contact_person})
+        .insert({"name": name, "contact_person": contact_person, "assigned_list_id": assigned_list_id})
         .execute()
     )
     return res.data[0]

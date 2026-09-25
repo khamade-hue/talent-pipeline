@@ -16,10 +16,20 @@ st.divider()
 if mode == "新規企業の登録":
     new_name = st.text_input("企業名")
     new_contact = st.text_input("担当者名(任意)")
+
+    list_options = [None] + list(list_names.keys())
+    new_assigned_list_id = st.selectbox(
+        "共有するリスト(任意)",
+        options=list_options,
+        format_func=lambda lid: "(未割り当て)" if lid is None else list_names[lid],
+    )
+    if not lists:
+        st.caption("リストが未作成です。「候補者リスト」ページで作成すると、ここから選択できます。")
+
     if st.button("登録する", type="primary"):
         if new_name.strip():
-            add_company(new_name.strip(), new_contact.strip())
-            st.success(f"「{new_name.strip()}」を登録しました。「既存企業のリスト修正」からシェアするリストを設定できます。")
+            add_company(new_name.strip(), new_contact.strip(), assigned_list_id=new_assigned_list_id)
+            st.success(f"「{new_name.strip()}」を登録しました。「既存企業のリスト修正」から共有URLを確認できます。")
         else:
             st.warning("企業名を入力してください")
 
