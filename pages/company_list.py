@@ -50,6 +50,31 @@ if not companies:
     st.info("まだ企業が登録されていません。「企業登録・リスト割り当て」ページから登録してください。")
     st.stop()
 
+@st.dialog("企業詳細")
+def detail_dialog(c: dict):
+    st.subheader(c["name"])
+    st.write(f"**担当者**: {c.get('contact_person') or '未登録'}")
+
+    stat_cols = st.columns(3)
+    stat_cols[0].metric("直近アクセス", format_visit(last_visit.get(c["id"])))
+    stat_cols[1].metric("候補者PV数", candidate_view_count.get(c["id"], 0))
+    stat_cols[2].metric("スカウト希望数", scout_request_count.get(c["id"], 0))
+
+    assigned_id = c.get("assigned_list_id")
+    st.write(f"**割り当てリスト**: {list_names[assigned_id] if assigned_id in list_names else '(未割り当て)'}")
+
+    if assigned_id in list_names:
+        share_url = f"{SHARE_BASE_URL}?c={c['id']}"
+        st.write("**共有URL**")
+        st.code(share_url, language=None)
+
+    if c.get("notes"):
+        st.write("**メモ**")
+        st.write(c["notes"])
+
+    st.caption("リストの割り当て変更は「企業登録・リスト割り当て」ページから行えます。")
+
+
 table_rows = [
     {
         "企業名": c["name"],
@@ -59,7 +84,15 @@ table_rows = [
     }
     for c in companies
 ]
-st.dataframe(table_rows, use_container_width=True, hide_index=True)
+st.caption("行をクリックすると詳細が表示されます。")
+selection = st.dataframe(
+    table_rows,
+    use_container_width=True,
+    hide_index=True,
+    on_select="rerun",
+    selection_mode="single-row",
+)
 
-st.divider()
-st.caption("共有URL・リスト割り当ての確認や変更は「企業登録・リスト割り当て」ページから行えます。")
+selected_rows = selection.selection.rows if selection and selection.selection else []
+if selected_rows:
+    detail_dialog(companies[selected_rows[0]])
