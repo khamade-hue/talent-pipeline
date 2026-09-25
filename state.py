@@ -2,7 +2,7 @@ import os
 
 from supabase import Client, create_client
 
-STATUS_OPTIONS = ["未対応", "確認済み", "企業へ推薦中", "面接設定", "内定", "辞退", "クローズ"]
+STATUS_OPTIONS = ["未対応", "確認済み", "クローズ"]
 INTENT_OPTIONS = ["今すぐ転職したい", "良い話があれば検討", "情報収集段階"]
 
 
