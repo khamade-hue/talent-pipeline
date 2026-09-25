@@ -74,3 +74,8 @@ def update_list(list_id: str, patch: dict) -> None:
 
 def delete_list(list_id: str) -> None:
     _client().table("lists").delete().eq("id", list_id).execute()
+
+
+def load_company_events() -> list[dict]:
+    res = _client().table("company_events").select("*").execute()
+    return res.data
