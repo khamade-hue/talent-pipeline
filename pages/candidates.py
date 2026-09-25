@@ -99,6 +99,11 @@ st.caption(f"{len(filtered)}件 / 全{len(candidates)}件")
 if not filtered:
     st.info("該当する候補者がいません。")
 
+header_cols = st.columns([3, 2, 2, 2, 2, 1])
+header_labels = ["氏名", "現職", "職種", "転職意向度", "ステータス", ""]
+for col, label in zip(header_cols, header_labels):
+    col.caption(label)
+
 for c in filtered:
     with st.container(border=True):
         cols = st.columns([3, 2, 2, 2, 2, 1])
