@@ -58,8 +58,13 @@ def load_lists() -> list[dict]:
     return res.data
 
 
-def add_list(name: str) -> dict:
-    res = _client().table("lists").insert({"name": name, "candidate_ids": []}).execute()
+def add_list(name: str, is_all_candidates: bool = False) -> dict:
+    res = (
+        _client()
+        .table("lists")
+        .insert({"name": name, "candidate_ids": [], "is_all_candidates": is_all_candidates})
+        .execute()
+    )
     return res.data[0]
 
 

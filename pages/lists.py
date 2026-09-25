@@ -17,9 +17,11 @@ lists = load_lists()
 with st.expander("＋ リストを新規作成"):
     with st.form("add_list_form", clear_on_submit=True):
         new_name = st.text_input("リスト名(例: エンタープライズ営業A)")
+        is_all = st.checkbox("全候補者を自動的に含める(動的リスト)")
+        st.caption("動的リストにすると、新しく登録された候補者も自動的に含まれるようになります。個別の追加・削除はできません。")
         if st.form_submit_button("作成する", type="primary"):
             if new_name.strip():
-                add_list(new_name.strip())
+                add_list(new_name.strip(), is_all_candidates=is_all)
                 st.rerun()
             else:
                 st.warning("リスト名を入力してください")
@@ -34,35 +36,47 @@ current_list = next(l for l in lists if l["id"] == selected_list_id)
 
 st.divider()
 
-member_ids = current_list.get("candidate_ids") or []
-members = [candidates_by_id[cid] for cid in member_ids if cid in candidates_by_id]
+is_dynamic = bool(current_list.get("is_all_candidates"))
 
-st.subheader(f"{current_list['name']} ・ {len(members)}名")
-
-for c in members:
-    cols = st.columns([4, 2, 2, 1])
-    cols[0].write(candidate_label(c))
-    cols[1].write(c.get("intent_level") or "-")
-    cols[2].write(c.get("status") or "-")
-    if cols[3].button("外す", key=f"remove_{c['id']}"):
-        new_ids = [cid for cid in member_ids if cid != c["id"]]
-        update_list(current_list["id"], {"candidate_ids": new_ids})
-        st.rerun()
-
-st.write("**候補者を追加**")
-pickable = [c for c in candidates if c["id"] not in member_ids]
-if not pickable:
-    st.caption("追加できる候補者がありません")
+if is_dynamic:
+    members = candidates
+    st.subheader(f"{current_list['name']} ・ {len(members)}名 ・ 🔄 動的リスト(全候補者)")
+    st.caption("このリストは全候補者を自動的に含みます。新規登録された候補者も自動で反映されます。")
+    for c in members:
+        cols = st.columns([4, 2, 2])
+        cols[0].write(candidate_label(c))
+        cols[1].write(c.get("intent_level") or "-")
+        cols[2].write(c.get("status") or "-")
 else:
-    pick_id = st.selectbox(
-        "候補者を選択して追加",
-        options=[c["id"] for c in pickable],
-        format_func=lambda cid: candidate_label(candidates_by_id[cid]),
-        key="pick_candidate_for_list",
-    )
-    if st.button("リストに追加"):
-        update_list(current_list["id"], {"candidate_ids": member_ids + [pick_id]})
-        st.rerun()
+    member_ids = current_list.get("candidate_ids") or []
+    members = [candidates_by_id[cid] for cid in member_ids if cid in candidates_by_id]
+
+    st.subheader(f"{current_list['name']} ・ {len(members)}名")
+
+    for c in members:
+        cols = st.columns([4, 2, 2, 1])
+        cols[0].write(candidate_label(c))
+        cols[1].write(c.get("intent_level") or "-")
+        cols[2].write(c.get("status") or "-")
+        if cols[3].button("外す", key=f"remove_{c['id']}"):
+            new_ids = [cid for cid in member_ids if cid != c["id"]]
+            update_list(current_list["id"], {"candidate_ids": new_ids})
+            st.rerun()
+
+    st.write("**候補者を追加**")
+    pickable = [c for c in candidates if c["id"] not in member_ids]
+    if not pickable:
+        st.caption("追加できる候補者がありません")
+    else:
+        pick_id = st.selectbox(
+            "候補者を選択して追加",
+            options=[c["id"] for c in pickable],
+            format_func=lambda cid: candidate_label(candidates_by_id[cid]),
+            key="pick_candidate_for_list",
+        )
+        if st.button("リストに追加"):
+            update_list(current_list["id"], {"candidate_ids": member_ids + [pick_id]})
+            st.rerun()
 
 st.divider()
 notes = st.text_area("リストメモ", value=current_list.get("notes") or "")
