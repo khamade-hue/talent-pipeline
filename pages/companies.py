@@ -1,5 +1,3 @@
-import json
-
 import streamlit as st
 
 from state import (
@@ -9,6 +7,8 @@ from state import (
     load_companies,
     update_company,
 )
+
+SHARE_BASE_URL = "https://beamish-ganache-be06b1.netlify.app/share.html"
 
 
 def candidate_label(c: dict) -> str:
@@ -75,32 +75,12 @@ else:
         st.rerun()
 
 st.divider()
-st.subheader("企業向け共有用データ")
-st.caption("氏名・直接連絡先は含まれません。この内容をコピーしてClaudeに渡すと、企業向け共有ページを生成・更新できます。")
+st.subheader("企業向け共有ページ")
+st.caption("氏名・直接連絡先は含まれません。シェアリストを更新すると、このURLの内容も自動的に最新になります。")
 
-if st.button("共有用データを生成"):
-    payload = {
-        "company": company["name"],
-        "candidates": [
-            {
-                "candidateId": f"C-{c['id'][-5:].upper()}",
-                "industry": c.get("industry"),
-                "salesType": c.get("sales_type"),
-                "area": c.get("area"),
-                "yearsExperience": c.get("years_experience"),
-                "currentSalary": c.get("current_salary"),
-                "achievements": c.get("achievements"),
-                "productTraits": c.get("product_traits"),
-                "hasManagementExp": c.get("has_management_exp"),
-                "intentLevel": c.get("intent_level"),
-                "desiredIndustries": c.get("desired_industries"),
-                "interestedRoles": c.get("interested_roles"),
-                "desiredConditions": c.get("desired_conditions"),
-            }
-            for c in shortlisted
-        ],
-    }
-    st.code(json.dumps(payload, ensure_ascii=False, indent=2), language="json")
+share_url = f"{SHARE_BASE_URL}?c={company['id']}"
+st.code(share_url, language=None)
+st.link_button("ページを開く", share_url)
 
 st.divider()
 notes = st.text_area("企業メモ", value=company.get("notes") or "")
