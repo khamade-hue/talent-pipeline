@@ -78,6 +78,7 @@ def detail_dialog(c: dict):
 table_rows = [
     {
         "企業名": c["name"],
+        "ステータス": "リスト割り当て済み" if c.get("assigned_list_id") else "未対応",
         "直近アクセス": format_visit(last_visit.get(c["id"])),
         "候補者PV数": candidate_view_count.get(c["id"], 0),
         "スカウト希望数": scout_request_count.get(c["id"], 0),
