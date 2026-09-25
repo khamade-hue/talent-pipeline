@@ -75,25 +75,18 @@ def detail_dialog(c: dict):
     st.caption("リストの割り当て変更は「企業登録・リスト割り当て」ページから行えます。")
 
 
-table_rows = [
-    {
-        "企業名": c["name"],
-        "ステータス": "リスト割り当て済み" if c.get("assigned_list_id") else "未対応",
-        "直近アクセス": format_visit(last_visit.get(c["id"])),
-        "候補者PV数": candidate_view_count.get(c["id"], 0),
-        "スカウト希望数": scout_request_count.get(c["id"], 0),
-    }
-    for c in companies
-]
-st.caption("行をクリックすると詳細が表示されます。")
-selection = st.dataframe(
-    table_rows,
-    use_container_width=True,
-    hide_index=True,
-    on_select="rerun",
-    selection_mode="single-row",
-)
+header_cols = st.columns([3, 2, 2, 1, 1, 1])
+header_labels = ["企業名", "ステータス", "直近アクセス", "候補者PV数", "スカウト希望数", ""]
+for col, label in zip(header_cols, header_labels):
+    col.caption(label)
 
-selected_rows = selection.selection.rows if selection and selection.selection else []
-if selected_rows:
-    detail_dialog(companies[selected_rows[0]])
+for c in companies:
+    with st.container(border=True):
+        cols = st.columns([3, 2, 2, 1, 1, 1])
+        cols[0].markdown(f"**{c['name']}**")
+        cols[1].write("リスト割り当て済み" if c.get("assigned_list_id") else "未対応")
+        cols[2].write(format_visit(last_visit.get(c["id"])))
+        cols[3].write(candidate_view_count.get(c["id"], 0))
+        cols[4].write(scout_request_count.get(c["id"], 0))
+        if cols[5].button("詳細", key=f"detail_{c['id']}", use_container_width=True):
+            detail_dialog(c)
