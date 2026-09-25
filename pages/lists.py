@@ -7,8 +7,8 @@ def candidate_label(c: dict) -> str:
     return f"{c.get('name') or '(未入力)'} ・ {c.get('current_company') or '現職不明'} ・ {c.get('sales_type') or ''}"
 
 
-st.title("候補者リスト")
-st.caption("企業に依存しない、使い回せる候補者リストを作成します。企業への共有は「企業・シェアリスト」ページでこのリストを選択して割り当てます。")
+st.title("候補者リスト登録")
+st.caption("企業に依存しない、使い回せる候補者リストを作成します。企業への共有は「企業登録・リスト割り当て」ページでこのリストを選択して割り当てます。")
 
 candidates = load_candidates()
 candidates_by_id = {c["id"]: c for c in candidates}

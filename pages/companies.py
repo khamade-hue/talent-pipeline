@@ -4,7 +4,7 @@ from state import add_company, delete_company, load_companies, load_lists, updat
 
 SHARE_BASE_URL = "https://beamish-ganache-be06b1.netlify.app/share.html"
 
-st.title("企業・シェアリスト")
+st.title("企業登録・リスト割り当て")
 
 companies = load_companies()
 lists = load_lists()
@@ -24,7 +24,7 @@ if mode == "新規企業の登録":
         format_func=lambda lid: "(未割り当て)" if lid is None else list_names[lid],
     )
     if not lists:
-        st.caption("リストが未作成です。「候補者リスト」ページで作成すると、ここから選択できます。")
+        st.caption("リストが未作成です。「候補者リスト登録」ページで作成すると、ここから選択できます。")
 
     if st.button("登録する", type="primary"):
         if new_name.strip():
@@ -48,7 +48,7 @@ else:
     st.subheader(company["name"])
 
     if not lists:
-        st.warning("先に「候補者リスト」ページでリストを作成してください。")
+        st.warning("先に「候補者リスト登録」ページでリストを作成してください。")
     else:
         options = [None] + list(list_names.keys())
         current_assigned = company.get("assigned_list_id")

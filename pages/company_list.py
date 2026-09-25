@@ -17,7 +17,7 @@ col2.metric("リスト割り当て済み", sum(1 for c in companies if c.get("as
 st.divider()
 
 if not companies:
-    st.info("まだ企業が登録されていません。「企業・シェアリスト」ページから登録してください。")
+    st.info("まだ企業が登録されていません。「企業登録・リスト割り当て」ページから登録してください。")
     st.stop()
 
 for c in companies:
