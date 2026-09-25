@@ -50,22 +50,16 @@ if not companies:
     st.info("まだ企業が登録されていません。「企業登録・リスト割り当て」ページから登録してください。")
     st.stop()
 
-for c in companies:
-    with st.container(border=True):
-        cols = st.columns([3, 2, 3])
-        cols[0].markdown(f"**{c['name']}**")
-        cols[1].write(c.get("contact_person") or "担当者未登録")
-        assigned_id = c.get("assigned_list_id")
-        cols[2].write(f"📋 {list_names[assigned_id]}" if assigned_id in list_names else "(リスト未割り当て)")
+table_rows = [
+    {
+        "企業名": c["name"],
+        "直近アクセス": format_visit(last_visit.get(c["id"])),
+        "候補者PV数": candidate_view_count.get(c["id"], 0),
+        "スカウト希望数": scout_request_count.get(c["id"], 0),
+    }
+    for c in companies
+]
+st.dataframe(table_rows, use_container_width=True, hide_index=True)
 
-        stat_cols = st.columns(3)
-        stat_cols[0].metric("直近アクセス", format_visit(last_visit.get(c["id"])))
-        stat_cols[1].metric("候補者PV数", candidate_view_count.get(c["id"], 0))
-        stat_cols[2].metric("スカウト希望数", scout_request_count.get(c["id"], 0))
-
-        if assigned_id in list_names:
-            share_url = f"{SHARE_BASE_URL}?c={c['id']}"
-            st.code(share_url, language=None)
-
-        if c.get("notes"):
-            st.caption(c["notes"])
+st.divider()
+st.caption("共有URL・リスト割り当ての確認や変更は「企業登録・リスト割り当て」ページから行えます。")
