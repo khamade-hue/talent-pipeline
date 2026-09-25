@@ -27,6 +27,7 @@ if not check_password():
 pg = st.navigation(
     [
         st.Page("pages/candidates.py", title="候補者一覧", icon="🧑‍💼"),
+        st.Page("pages/lists.py", title="候補者リスト", icon="📋"),
         st.Page("pages/companies.py", title="企業・シェアリスト", icon="🏢"),
     ]
 )

@@ -39,7 +39,7 @@ def add_company(name: str, contact_person: str) -> dict:
     res = (
         _client()
         .table("companies")
-        .insert({"name": name, "contact_person": contact_person, "shortlist_ids": []})
+        .insert({"name": name, "contact_person": contact_person})
         .execute()
     )
     return res.data[0]
@@ -51,3 +51,21 @@ def update_company(company_id: str, patch: dict) -> None:
 
 def delete_company(company_id: str) -> None:
     _client().table("companies").delete().eq("id", company_id).execute()
+
+
+def load_lists() -> list[dict]:
+    res = _client().table("lists").select("*").order("created_at", desc=True).execute()
+    return res.data
+
+
+def add_list(name: str) -> dict:
+    res = _client().table("lists").insert({"name": name, "candidate_ids": []}).execute()
+    return res.data[0]
+
+
+def update_list(list_id: str, patch: dict) -> None:
+    _client().table("lists").update(patch).eq("id", list_id).execute()
+
+
+def delete_list(list_id: str) -> None:
+    _client().table("lists").delete().eq("id", list_id).execute()

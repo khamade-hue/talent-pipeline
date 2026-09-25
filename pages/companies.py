@@ -1,25 +1,14 @@
 import streamlit as st
 
-from state import (
-    add_company,
-    delete_company,
-    load_candidates,
-    load_companies,
-    update_company,
-)
+from state import add_company, delete_company, load_companies, load_lists, update_company
 
 SHARE_BASE_URL = "https://beamish-ganache-be06b1.netlify.app/share.html"
 
-
-def candidate_label(c: dict) -> str:
-    return f"{c.get('name') or '(未入力)'} ・ {c.get('current_company') or '現職不明'} ・ {c.get('sales_type') or ''}"
-
-
 st.title("企業・シェアリスト")
 
-candidates = load_candidates()
-candidates_by_id = {c["id"]: c for c in candidates}
 companies = load_companies()
+lists = load_lists()
+list_names = {l["id"]: l["name"] for l in lists}
 
 with st.expander("＋ 企業を追加"):
     with st.form("add_company_form", clear_on_submit=True):
@@ -43,44 +32,30 @@ selected_company_id = st.selectbox(
 company = next(c for c in companies if c["id"] == selected_company_id)
 
 st.divider()
+st.subheader(company["name"])
 
-shortlist_ids = company.get("shortlist_ids") or []
-shortlisted = [candidates_by_id[cid] for cid in shortlist_ids if cid in candidates_by_id]
-
-st.subheader(f"{company['name']} ・ シェア中の候補者({len(shortlisted)})")
-
-for c in shortlisted:
-    cols = st.columns([4, 2, 2, 1])
-    cols[0].write(candidate_label(c))
-    cols[1].write(c.get("intent_level") or "-")
-    cols[2].write(c.get("status") or "-")
-    if cols[3].button("外す", key=f"remove_{c['id']}"):
-        new_ids = [cid for cid in shortlist_ids if cid != c["id"]]
-        update_company(company["id"], {"shortlist_ids": new_ids})
-        st.rerun()
-
-st.write("**候補者を追加**")
-pickable = [c for c in candidates if c["id"] not in shortlist_ids]
-if not pickable:
-    st.caption("追加できる候補者がありません")
+if not lists:
+    st.warning("先に「候補者リスト」ページでリストを作成してください。")
 else:
-    pick_id = st.selectbox(
-        "候補者を選択して追加",
-        options=[c["id"] for c in pickable],
-        format_func=lambda cid: candidate_label(candidates_by_id[cid]),
-        key="pick_candidate",
+    options = [None] + list(list_names.keys())
+    current_assigned = company.get("assigned_list_id")
+    assigned_list_id = st.selectbox(
+        "共有するリスト",
+        options=options,
+        index=options.index(current_assigned) if current_assigned in options else 0,
+        format_func=lambda lid: "(未割り当て)" if lid is None else list_names[lid],
     )
-    if st.button("シェアリストに追加"):
-        update_company(company["id"], {"shortlist_ids": shortlist_ids + [pick_id]})
+    if assigned_list_id != current_assigned:
+        update_company(company["id"], {"assigned_list_id": assigned_list_id})
         st.rerun()
 
-st.divider()
-st.subheader("企業向け共有ページ")
-st.caption("氏名・直接連絡先は含まれません。シェアリストを更新すると、このURLの内容も自動的に最新になります。")
-
-share_url = f"{SHARE_BASE_URL}?c={company['id']}"
-st.code(share_url, language=None)
-st.link_button("ページを開く", share_url)
+    if company.get("assigned_list_id"):
+        st.divider()
+        st.subheader("企業向け共有ページ")
+        st.caption("氏名・直接連絡先は含まれません。割り当てるリストを変更すると、このURLの内容も自動的に最新になります。")
+        share_url = f"{SHARE_BASE_URL}?c={company['id']}"
+        st.code(share_url, language=None)
+        st.link_button("ページを開く", share_url)
 
 st.divider()
 notes = st.text_area("企業メモ", value=company.get("notes") or "")
