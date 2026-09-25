@@ -17,8 +17,8 @@ lists = load_lists()
 with st.expander("＋ リストを新規作成"):
     with st.form("add_list_form", clear_on_submit=True):
         new_name = st.text_input("リスト名(例: エンタープライズ営業A)")
-        is_all = st.checkbox("全候補者を自動的に含める(動的リスト)")
-        st.caption("動的リストにすると、新しく登録された候補者も自動的に含まれるようになります。個別の追加・削除はできません。")
+        is_all = st.checkbox("「確認済み」の候補者を自動的に含める(動的リスト)")
+        st.caption("動的リストにすると、候補者一覧でステータスが「確認済み」の候補者が自動的に含まれるようになります。個別の追加・削除はできません。")
         if st.form_submit_button("作成する", type="primary"):
             if new_name.strip():
                 add_list(new_name.strip(), is_all_candidates=is_all)
@@ -39,9 +39,9 @@ st.divider()
 is_dynamic = bool(current_list.get("is_all_candidates"))
 
 if is_dynamic:
-    members = candidates
-    st.subheader(f"{current_list['name']} ・ {len(members)}名 ・ 🔄 動的リスト(全候補者)")
-    st.caption("このリストは全候補者を自動的に含みます。新規登録された候補者も自動で反映されます。")
+    members = [c for c in candidates if c.get("status") == "確認済み"]
+    st.subheader(f"{current_list['name']} ・ {len(members)}名 ・ 🔄 動的リスト(確認済みの候補者)")
+    st.caption("このリストはステータスが「確認済み」の候補者を自動的に含みます。候補者一覧でステータスを変更すると自動で反映されます。")
     for c in members:
         cols = st.columns([4, 2, 2])
         cols[0].write(candidate_label(c))
